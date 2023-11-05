@@ -1,0 +1,37 @@
+services:
+  gitlab:
+    image: gitlab/gitlab-ce:latest
+    hostname: localhost
+    restart: unless-stopped
+    container_name: gitlab-ce
+    environment:
+      GITLAB_OMNIBUS_CONFIG: |
+        gitlab_rails['gitlab_shell_ssh_port'] = 8822
+        external_url 'http://localhost'
+    ports:
+      - "80:80"
+      - "443:443"
+      - "22:22"
+    volumes:
+      - /data/docker/gitlab/etc/gitlab:/etc/gitlab
+      - /data/docker/gitlab/var/opt/gitlab:/var/opt/gitlab
+      - /data/docker/gitlab/var/log/gitlab:/var/log/gitlab
+    networks:
+      - gitlab
+
+  gitlab-runner:
+    image: gitlab/gitlab-runner:alpine
+    container_name: gitlab-runner
+    restart: unless-stopped
+    depends_on:
+      - gitlab
+    volumes:
+      - /data/docker/gitlab/etc/gitlab-runner:/etc/gitlab-runner
+      - /data/docker/gitlab/var/run/docker.sock:/var/run/docker.sock
+    networks:
+      - gitlab
+networks:
+  gitlab:
+    name: gitlab-network
+
+
